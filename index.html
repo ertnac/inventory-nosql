@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Inventory Management</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #fd79a8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(108, 92, 231, 0.3);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5649c0;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #8c7ae6;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #00a884;
+            transform: translateY(-2px);
+        }
+
+        .table-container {
+            margin-top: 30px;
+            overflow-x: auto;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(162, 155, 254, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-buttons button {
+            padding: 8px 12px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark);
+        }
+
+        .blob {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            filter: blur(50px);
+            opacity: 0.2;
+            z-index: -1;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .blob:nth-child(1) {
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .blob:nth-child(2) {
+            bottom: -100px;
+            right: -100px;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            25% {
+                transform: translate(50px, 50px);
+            }
+
+            50% {
+                transform: translate(0, 100px);
+            }
+
+            75% {
+                transform: translate(-50px, 50px);
+            }
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-filter .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            th,
+            td {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .action-buttons button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Liquid blobs for background effect -->
+    <div class="blob"></div>
+    <div class="blob"></div>
+
+    <div class="container">
+        <h1> Inventory Management</h1>
+
+        <!-- Inventory Form -->
+        <div class="form-container">
+            <form id="inventoryForm">
+                <input type="hidden" id="itemId">
+                <div class="form-group">
+                    <label for="name">Item Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" required>
+                        <option value="">Select Category</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Food">Food</option>
+                        <option value="Furniture">Furniture</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="quantity" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Price (USD)</label>
+                    <input type="number" id="price" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="supplier">Supplier</label>
+                    <input type="text" id="supplier">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn-primary" id="submitBtn">Add Item</button>
+                    <button type="button" class="btn-secondary" id="clearBtn">Clear</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="search-filter">
+            <div class="form-group">
+                <label for="search">Search</label>
+                <input type="text" id="search" placeholder="Search items...">
+            </div>
+            <div class="form-group">
+                <label for="filterCategory">Filter by Category</label>
+                <select id="filterCategory">
+                    <option value="">All Categories</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Food">Food</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Inventory Table -->
+        <div class="table-container">
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Supplier</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryTableBody">
+                    <!-- Items will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Confirm Delete</h2>
+            <p>Are you sure you want to delete this item?</p>
+            <div style="margin-top: 20px;">
+                <button class="btn-danger" id="confirmDelete">Delete</button>
+                <button class="btn-secondary" id="cancelDelete">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeEditModal">&times;</span>
+            <h2>Edit Item</h2>
+            <form id="editForm">
+                <input type="hidden" id="editItemId">
+                <div class="form-group">
+                    <label for="editName">Item Name</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCategory">Category</label>
+                    <select id="editCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Food">Food</option>
+                        <option value="Furniture">Furniture</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editQuantity">Quantity</label>
+                    <input type="number" id="editQuantity" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPrice">Price (USD)</label>
+                    <input type="number" id="editPrice" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="editSupplier">Supplier</label>
+                    <input type="text" id="editSupplier">
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <button type="submit" class="btn-primary">Update Item</button>
+                    <button type="button" class="btn-secondary" id="cancelEdit">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script type="module">
+        // Import the functions you need from the Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCc0jXt__BMNjOgwpQOYR-lakh6zPwI0is",
+            authDomain: "cantre-adbms.firebaseapp.com",
+            projectId: "cantre-adbms",
+            storageBucket: "cantre-adbms.appspot.com",
+            messagingSenderId: "318867911478",
+            appId: "1:318867911478:web:6a8a9fbf3bb4fd3caef997",
+            measurementId: "G-RGG4GPR62X"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // DOM Elements
+        const inventoryForm = document.getElementById('inventoryForm');
+        const inventoryTableBody = document.getElementById('inventoryTableBody');
+        const submitBtn = document.getElementById('submitBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const searchInput = document.getElementById('search');
+        const filterCategory = document.getElementById('filterCategory');
+        const deleteModal = document.getElementById('deleteModal');
+        const confirmDelete = document.getElementById('confirmDelete');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const closeModal = document.querySelector('.close-modal');
+        const notification = document.getElementById('notification');
+        const editModal = document.getElementById('editModal');
+        const editForm = document.getElementById('editForm');
+        const closeEditModal = document.getElementById('closeEditModal');
+        const cancelEdit = document.getElementById('cancelEdit');
+
+        // Variables
+        let items = [];
+        let currentItemId = null;
+        let isEditing = false;
+
+        // Event Listeners
+        inventoryForm.addEventListener('submit', handleFormSubmit);
+        clearBtn.addEventListener('click', clearForm);
+        searchInput.addEventListener('input', filterItems);
+        filterCategory.addEventListener('change', filterItems);
+        confirmDelete.addEventListener('click', deleteItem);
+        cancelDelete.addEventListener('click', closeDeleteModal);
+        closeModal.addEventListener('click', closeDeleteModal);
+        editForm.addEventListener('submit', handleEditSubmit);
+        closeEditModal.addEventListener('click', closeEditModalFunc);
+        cancelEdit.addEventListener('click', closeEditModalFunc);
+
+        // Initialize the app
+        function init() {
+            fetchItems();
+        }
+
+        // Fetch items from Firestore
+        async function fetchItems() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "inventory"));
+                items = [];
+                querySnapshot.forEach((doc) => {
+                    items.push({ id: doc.id, ...doc.data() });
+                });
+                renderItems(items);
+            } catch (error) {
+                showNotification('Error fetching items: ' + error.message, 'error');
+            }
+        }
+
+        // Real-time listener for items
+        function setupRealTimeListener() {
+            const q = query(collection(db, "inventory"));
+            onSnapshot(q, (querySnapshot) => {
+                items = [];
+                querySnapshot.forEach((doc) => {
+                    items.push({ id: doc.id, ...doc.data() });
+                });
+                renderItems(items);
+            });
+        }
+
+        // Render items to the table
+        function renderItems(itemsToRender) {
+            inventoryTableBody.innerHTML = '';
+
+            if (itemsToRender.length === 0) {
+                inventoryTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No items found</td></tr>';
+                return;
+            }
+
+            itemsToRender.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.category}</td>
+                    <td>${item.quantity}</td>
+                    <td>$${item.price.toFixed(2)}</td>
+                    <td>${item.supplier || '-'}</td>
+                    <td class="action-buttons">
+                        <button class="btn-secondary edit-btn" data-id="${item.id}">Edit</button>
+                        <button class="btn-danger delete-btn" data-id="${item.id}">Delete</button>
+                    </td>
+                `;
+                inventoryTableBody.appendChild(tr);
+            });
+
+            // Add event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => editItem(btn.dataset.id));
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => openDeleteModal(btn.dataset.id));
+            });
+        }
+
+        // Handle form submission
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const item = {
+                name: document.getElementById('name').value,
+                nameLower: document.getElementById('name').value.toLowerCase(), // Add this line
+                category: document.getElementById('category').value,
+                quantity: parseInt(document.getElementById('quantity').value),
+                price: parseFloat(document.getElementById('price').value),
+                supplier: document.getElementById('supplier').value,
+                updatedAt: new Date()
+            };
+
+            try {
+                if (isEditing) {
+                    // Update existing item
+                    await updateDoc(doc(db, "inventory", currentItemId), item);
+                    showNotification('Item updated successfully!', 'success');
+                } else {
+                    // Add new item
+                    await addDoc(collection(db, "inventory"), item);
+                    showNotification('Item added successfully!', 'success');
+                }
+
+                clearForm();
+            } catch (error) {
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Edit item - opens modal with item data
+        function editItem(id) {
+            const item = items.find(item => item.id === id);
+            if (item) {
+                document.getElementById('editItemId').value = item.id;
+                document.getElementById('editName').value = item.name;
+                document.getElementById('editCategory').value = item.category;
+                document.getElementById('editQuantity').value = item.quantity;
+                document.getElementById('editPrice').value = item.price;
+                document.getElementById('editSupplier').value = item.supplier || '';
+
+                currentItemId = item.id;
+                editModal.style.display = 'flex';
+            }
+        }
+
+        // Handle edit form submission
+        async function handleEditSubmit(e) {
+            e.preventDefault();
+
+            const item = {
+                name: document.getElementById('editName').value,
+                category: document.getElementById('editCategory').value,
+                quantity: parseInt(document.getElementById('editQuantity').value),
+                price: parseFloat(document.getElementById('editPrice').value),
+                supplier: document.getElementById('editSupplier').value,
+                updatedAt: new Date()
+            };
+
+            try {
+                // Update existing item
+                await updateDoc(doc(db, "inventory", currentItemId), item);
+                showNotification('Item updated successfully!', 'success');
+                closeEditModalFunc();
+            } catch (error) {
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Open delete confirmation modal
+        function openDeleteModal(id) {
+            currentItemId = id;
+            deleteModal.style.display = 'flex';
+        }
+
+        // Close delete confirmation modal
+        function closeDeleteModal() {
+            deleteModal.style.display = 'none';
+            currentItemId = null;
+        }
+
+        // Close edit modal
+        function closeEditModalFunc() {
+            editModal.style.display = 'none';
+            currentItemId = null;
+        }
+
+        // Delete item
+        async function deleteItem() {
+            try {
+                await deleteDoc(doc(db, "inventory", currentItemId));
+                showNotification('Item deleted successfully!', 'success');
+                closeDeleteModal();
+            } catch (error) {
+                showNotification('Error deleting item: ' + error.message, 'error');
+            }
+        }
+
+        // Clear form
+        function clearForm() {
+            inventoryForm.reset();
+            document.getElementById('itemId').value = '';
+            submitBtn.textContent = 'Add Item';
+            isEditing = false;
+            currentItemId = null;
+        }
+
+        // Filter items based on search and category
+        function filterItems() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const categoryFilter = filterCategory.value;
+
+            let filteredItems = items;
+
+            if (searchTerm) {
+                filteredItems = filteredItems.filter(item =>
+                    item.name.toLowerCase().includes(searchTerm) ||
+                    (item.supplier && item.supplier.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (categoryFilter) {
+                filteredItems = filteredItems.filter(item => item.category === categoryFilter);
+            }
+
+            renderItems(filteredItems);
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            setupRealTimeListener();
+        });
+    </script>
+</body>
+
+</html>
